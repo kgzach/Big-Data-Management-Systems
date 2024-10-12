@@ -1,6 +1,6 @@
 import os
-#https://toruseo.jp/UXsim/docs/index.html
-#      Example code that was given
+import random
+
 from uxsim import *
 import itertools
 from pymongo.mongo_client import MongoClient
@@ -8,6 +8,7 @@ from pymongo.server_api import ServerApi
 from kafka import KafkaProducer
 import pyspark
 from dotenv import load_dotenv
+import sqlite3
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ try:
     print('Conencted to broker')
 except Exception as e:
     print('No Brokers Available')
+    exit(1)
 
 uri = os.getenv('MONGO_URI')
 client = MongoClient(uri, server_api=ServerApi('1'))
@@ -30,6 +32,8 @@ except Exception as e:
     print('fail')
 
 
+#https://toruseo.jp/UXsim/docs/index.html
+#      Example code that was given
 seed = None
 
 W = World(
@@ -131,4 +135,13 @@ def create_kafka_topic(bootstrap_servers, topic_name, num_partitions, replicatio
         admin_client.close()
 topic_name=os.getenv('TOPIC_NAME')
 create_kafka_topic(bootstrap_servers=kafka_broker, topic_name=topic_name, num_partitions=3, replication_factor=1)
+
+# added to be seen from other scripts
+db_path = 'db.sqlite3'
+conn = sqlite3.connect(db_path)
+df.to_sql('vehicle_data', conn, if_exists='replace', index=False)
+conn.close()
+
+os.environ['KAFKA_BROKER'] = kafka_broker
+os.environ['DB_PATH'] = db_path
 

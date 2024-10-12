@@ -1,6 +1,14 @@
 ## 1.5 ##
-from kafka import KafkaConsumer
+import os
 import json
+from kafka import KafkaConsumer
+from dotenv import load_dotenv
+
+load_dotenv()
+
+kafka_broker = os.getenv('KAFKA_BROKER')
+db_path = os.getenv('DB_PATH')
+topic_name=os.getenv('TOPIC_NAME')
 
 def consume_vehicle_data(bootstrap_servers, topic_name):
     consumer = KafkaConsumer(

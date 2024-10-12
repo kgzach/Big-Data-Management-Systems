@@ -1,10 +1,19 @@
 ## 1.4 ##
+import os
 import json
 import time
 from datetime import datetime, timedelta
 from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
+
+kafka_broker = os.getenv('KAFKA_BROKER')
+db_path = os.getenv('DB_PATH')
+topic_name=os.getenv('TOPIC_NAME')
+
 last_indices = {}
 
 def send_vehicle_data(bootstrap_servers, topic_name, interval, data):
