@@ -1,6 +1,5 @@
 import os
 import random
-
 from uxsim import *
 import itertools
 from pymongo.mongo_client import MongoClient
@@ -9,6 +8,9 @@ from kafka import KafkaProducer
 import pyspark
 from dotenv import load_dotenv
 import sqlite3
+## 1.3 ##
+from kafka.admin import KafkaAdminClient, NewTopic
+
 
 load_dotenv()
 
@@ -17,16 +19,18 @@ try:
     kafka_broker = os.getenv("OFFLINE_BROKER")
     producer = KafkaProducer(bootstrap_servers=kafka_broker)
     producer.send('Test', b'Hello, Kafka!')
-    print('Conencted to broker')
+    print('Connected to broker')
 except Exception as e:
     print('No Brokers Available')
     exit(1)
 
 uri = os.getenv('MONGO_URI')
+clientName = os.getenv('MONGO_DB_NAME')
+collections = os.getenv('MONGO_DB_COLLECTION')
 client = MongoClient(uri, server_api=ServerApi('1'))
 try:
-    db = client['BigData']
-    db.create_collection('Test')
+    db = client[clientName]
+    db.create_collection(collections)
 except Exception as e:
     print(e)
     print('fail')
@@ -115,26 +119,27 @@ df = W.analyzer.vehicles_to_pandas()
 #df['signal_time'] = signal_time
 df['index'] = range(len(df))
 
-## 1.3 ##
-from kafka.admin import KafkaAdminClient, NewTopic
-
-def create_kafka_topic(bootstrap_servers, topic_name, num_partitions, replication_factor):
-    admin_client = KafkaAdminClient(
-        bootstrap_servers=bootstrap_servers,
-        client_id=os.getenv('CLIENT_ID')
-    )
-
-    topic_list = [NewTopic(name=topic_name, num_partitions=num_partitions, replication_factor=replication_factor)]
+def create_kafka_topic(adminClient, topicName, num_partitions, replication_factor):
+    topic_list = [NewTopic(name=topicName, num_partitions=num_partitions, replication_factor=replication_factor)]
 
     try:
-        admin_client.create_topics(new_topics=topic_list, validate_only=False)
-        print(f"Topic '{topic_name}' created successfully")
+        adminClient.create_topics(new_topics=topic_list, validate_only=False)
+        print(f"Topic '{topicName}' created successfully")
     except Exception as e:
-        print(f"Failed to create topic '{topic_name}': {e}")
+        print(f"Failed to create topic '{topicName}': {e}")
     finally:
-        admin_client.close()
+        adminClient.close()
+
+admin_client = KafkaAdminClient(
+    bootstrap_servers=kafka_broker,
+    client_id=os.getenv('CLIENT_ID')
+)
 topic_name=os.getenv('TOPIC_NAME')
-create_kafka_topic(bootstrap_servers=kafka_broker, topic_name=topic_name, num_partitions=3, replication_factor=1)
+topics = admin_client.list_topics()
+if topic_name in topics:
+    print(f"Topic '{topic_name}' exists.")
+else:
+    create_kafka_topic(admin_client, topicName=topic_name, num_partitions=3, replication_factor=1)
 
 # added to be seen from other scripts
 db_path = 'db.sqlite3'

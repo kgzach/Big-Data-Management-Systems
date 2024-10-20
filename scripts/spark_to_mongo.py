@@ -1,13 +1,9 @@
-import os
-from dotenv import load_dotenv
+from pyspark.sql.functions import col
 
-load_dotenv()
-
-kafka_broker = os.getenv('KAFKA_BROKER')
-db_path = os.getenv('DB_PATH')
-db_name = os.getenv('MONGO_DB_NAME')
-collection_name = os.getenv('MONGO_DB_COLLECTION')
-topic_name=os.getenv('TOPIC_NAME')
-
-def saveToMongo():
-    pass
+def saveToMongo(df, db_uri, db_name, collection_name):
+    transformed_df = df.withColumn("processed_value", col("json"))
+    transformed_df.write \
+        .format("mongodb") \
+        .mode("append") \
+        .option("spark.mongodb.output.uri", f"{db_uri}/{db_name}.{collection_name}") \
+        .save()
