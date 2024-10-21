@@ -7,12 +7,14 @@ from kafka import KafkaProducer
 from kafka.admin import KafkaAdminClient, NewTopic
 import pandas as pd
 from dotenv import load_dotenv
-
+from auxilliary import loadDataFromDb
 load_dotenv()
 
 kafka_broker = os.getenv('KAFKA_BROKER')
 db_path = os.getenv('DB_PATH')
 topic_name=os.getenv('TOPIC_NAME')
+df = loadDataFromDb(db_path)
+
 
 last_indices = {}
 
@@ -59,8 +61,11 @@ def send_vehicle_data(bootstrap_servers, topic_name, interval, data):
         pass
 
 
-num_partitions = 5
-replication_factor = 1
+if not df.empty:
+    num_partitions = 5
+    replication_factor = 1
+    interval = 5
 
-interval = 5
-send_vehicle_data(kafka_broker, topic_name, interval, df)
+    send_vehicle_data(kafka_broker, topic_name, interval, df)
+else:
+    print("DataFrame is empty. Exiting...")
