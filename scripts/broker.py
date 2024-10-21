@@ -1,19 +1,17 @@
 import os
 import random
-from uxsim import *
-import itertools
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-from kafka import KafkaProducer
-import pyspark
-from dotenv import load_dotenv
 import sqlite3
-## 1.3 ##
-from kafka.admin import KafkaAdminClient, NewTopic
+import pyspark
+import itertools
+from uxsim import *
+from dotenv import load_dotenv
+from kafka import KafkaProducer
+from pymongo.server_api import ServerApi
+from pymongo.mongo_client import MongoClient
+from kafka.admin import KafkaAdminClient, NewTopic ## 1.3 ##
 
 
 load_dotenv()
-
 try:
     #kafka_broker = os.getenv("REMOTE_BROKER")
     kafka_broker = os.getenv("OFFLINE_BROKER")
@@ -142,11 +140,9 @@ else:
     create_kafka_topic(admin_client, topicName=topic_name, num_partitions=3, replication_factor=1)
 
 # added to be seen from other scripts
-db_path = 'db.sqlite3'
+#db_path = os.getenv('DB_PATH')
+db_path = "../db.sqlite3"
 conn = sqlite3.connect(db_path)
 df.to_sql('vehicle_data', conn, if_exists='replace', index=False)
 conn.close()
-
-os.environ['KAFKA_BROKER'] = kafka_broker
 os.environ['DB_PATH'] = db_path
-

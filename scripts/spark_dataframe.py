@@ -5,13 +5,13 @@ from pyspark.sql.functions import col, from_json, to_timestamp, window
 from pyspark.sql.types import StructType, StructField, StringType, FloatType, TimestampType, SubscribeType
 from spark_to_mongo import saveToMongo
 
+
 load_dotenv()
-kafka_broker = os.getenv('KAFKA_BROKER')
+kafka_broker = os.getenv('OFFLINE_BROKER')
 db_path = os.getenv('DB_PATH')
 db_name = os.getenv('MONGO_DB_NAME')
 collection_name = os.getenv('MONGO_DB_COLLECTION')
 topic_name=os.getenv('TOPIC_NAME')
-
 
 spark = SparkSession.builder \
     .appName(topic_name) \

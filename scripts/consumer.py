@@ -4,9 +4,10 @@ import json
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
-kafka_broker = os.getenv('KAFKA_BROKER')
+kafka_broker = os.getenv('OFFLINE_BROKER')
 db_path = os.getenv('DB_PATH')
 topic_name=os.getenv('TOPIC_NAME')
 

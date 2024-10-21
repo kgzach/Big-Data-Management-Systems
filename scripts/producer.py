@@ -8,9 +8,11 @@ from kafka.admin import KafkaAdminClient, NewTopic
 import pandas as pd
 from dotenv import load_dotenv
 from auxilliary import loadDataFromDb
+
+
 load_dotenv()
 
-kafka_broker = os.getenv('KAFKA_BROKER')
+kafka_broker = os.getenv('OFFLINE_BROKER')
 db_path = os.getenv('DB_PATH')
 topic_name=os.getenv('TOPIC_NAME')
 df = loadDataFromDb(db_path)
