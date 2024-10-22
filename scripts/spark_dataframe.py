@@ -1,27 +1,32 @@
 import os
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json, to_timestamp, window
-from pyspark.sql.types import StructType, StructField, StringType, FloatType, TimestampType, SubscribeType
 from spark_to_mongo import saveToMongo
+from pyspark.sql.functions import col, from_json, to_timestamp, window
+from pyspark.sql.types import StructType, StructField, StringType, FloatType, TimestampType
 
 
 load_dotenv()
 kafka_broker = os.getenv('OFFLINE_BROKER')
 db_path = os.getenv('DB_PATH')
+mongo_uri = os.getenv('MONGO_URI')
+topic_name=os.getenv('TOPIC_NAME')
 db_name = os.getenv('MONGO_DB_NAME')
 collection_name = os.getenv('MONGO_DB_COLLECTION')
-topic_name=os.getenv('TOPIC_NAME')
+spark_driver = os.getenv('SPARK_DRIVER')
 
 spark = SparkSession.builder \
     .appName(topic_name) \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13-3.8.0") \
+    .config("spark.mongodb.output.uri", mongo_uri ) \
+    .config("spark.driver.host", spark_driver) \
     .getOrCreate()
 
 lines = spark \
     .readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", kafka_broker) \
-    .option(StructType, topic_name) \
+    .option("subscribe", topic_name) \
     .load()
 
 lines = lines \
