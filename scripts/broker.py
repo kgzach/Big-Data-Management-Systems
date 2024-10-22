@@ -139,6 +139,7 @@ if topic_name in topics:
 else:
     create_kafka_topic(admin_client, topicName=topic_name, num_partitions=3, replication_factor=1)
 
+print("Saving data")
 # added to be seen from other scripts
 #db_path = os.getenv('DB_PATH')
 db_path = "../db.sqlite3"

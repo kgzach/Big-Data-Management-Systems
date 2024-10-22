@@ -1,13 +1,12 @@
 ## 1.4 ##
 import os
 import json
-import time
-from datetime import datetime, timedelta
-from kafka import KafkaProducer
-from kafka.admin import KafkaAdminClient, NewTopic
 import pandas as pd
 from dotenv import load_dotenv
+from kafka import KafkaProducer
 from auxilliary import loadDataFromDb
+from datetime import datetime, timedelta
+from kafka.admin import KafkaAdminClient, NewTopic
 
 
 load_dotenv()
@@ -59,15 +58,14 @@ def send_vehicle_data(bootstrap_servers, topic_name, interval, data):
     except KeyboardInterrupt:
         print("Stopping data transmission.")
     finally:
-        #producer.close()
-        pass
+        producer.close()
 
 
 if not df.empty:
     num_partitions = 5
     replication_factor = 1
     interval = 5
-
+    print("Start sending data")
     send_vehicle_data(kafka_broker, topic_name, interval, df)
 else:
     print("DataFrame is empty. Exiting...")

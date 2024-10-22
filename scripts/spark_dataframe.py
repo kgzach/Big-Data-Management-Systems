@@ -13,14 +13,18 @@ mongo_uri = os.getenv('MONGO_URI')
 topic_name=os.getenv('TOPIC_NAME')
 db_name = os.getenv('MONGO_DB_NAME')
 collection_name = os.getenv('MONGO_DB_COLLECTION')
-spark_driver = os.getenv('SPARK_DRIVER')
 
 spark = SparkSession.builder \
     .appName(topic_name) \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13-3.8.0") \
+    .master("local[*]") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13:3.3.0") \
     .config("spark.mongodb.output.uri", mongo_uri ) \
-    .config("spark.driver.host", spark_driver) \
     .getOrCreate()
+#.config("spark.driver.host", spark_driver) \
+spark_driver = os.getenv('SPARK_DRIVER')
+if spark_driver is None:
+    spark_driver = spark.conf.get("spark.driver.host")
+print("Loading spark session...")
 
 lines = spark \
     .readStream \

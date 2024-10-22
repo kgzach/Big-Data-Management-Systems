@@ -1,8 +1,7 @@
 ## 1.5 ##
 import os
-import json
-from kafka import KafkaConsumer
 from dotenv import load_dotenv
+from kafka import KafkaConsumer
 
 
 load_dotenv()
@@ -20,10 +19,12 @@ def consume_vehicle_data(bootstrap_servers, topic_name):
     try:
         for message in consumer:
             print(f"Received message: {message.value}")
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("Stopping consumer.")
     finally:
-        #consumer.close()
-        pass
+        consumer.close()
 
+print("Start consuming")
 consume_vehicle_data(kafka_broker, topic_name)
+
+

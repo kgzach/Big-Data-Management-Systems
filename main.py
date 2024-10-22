@@ -26,11 +26,11 @@ if __name__ == '__main__':
     spark_process = Process(target=run_script, args=('spark_dataframe.py',))
 
     run_script('broker.py') # success
-    time.sleep(5)
+    time.sleep(2)
     producer_process.start() # success
-    time.sleep(5)
+    time.sleep(1)
     consumer_process.start() #TODO
-    time.sleep(5)
+    time.sleep(1)
     spark_process.start() #TODO
     try:
         while True:
