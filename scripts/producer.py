@@ -19,18 +19,18 @@ df = loadDataFromDb(db_path)
 
 last_indices = {}
 
-def send_vehicle_data(bootstrap_servers, topic_name, interval, data):
+def send_vehicle_data(bootstrapServers, topicName, interval, data):
     producer = KafkaProducer(
-        bootstrap_servers=bootstrap_servers,
+        bootstrap_servers=bootstrapServers,
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
-    start_time = datetime.utcnow()
+    start_time = datetime.now()
     count = 7200
     cnt = 0
     try:
         while cnt < count:#while True:
             cnt+=1
-            current_time = datetime.utcnow()
+            current_time = datetime.now()
             elapsed_time = (current_time - start_time).total_seconds()
 
             for index, row in data.iterrows():
@@ -50,7 +50,7 @@ def send_vehicle_data(bootstrap_servers, topic_name, interval, data):
                                 "spacing": row['s'],
                                 "speed": row['v']
                             }
-                            producer.send(topic_name, value=message)
+                            producer.send(topicName, value=message)
                             print(f"Sent data: {message}")
 
                             # Update the last index for the vehicle

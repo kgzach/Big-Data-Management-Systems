@@ -10,10 +10,10 @@ kafka_broker = os.getenv('OFFLINE_BROKER')
 db_path = os.getenv('DB_PATH')
 topic_name=os.getenv('TOPIC_NAME')
 
-def consume_vehicle_data(bootstrap_servers, topic_name):
+def consume_vehicle_data(bootstrapServers, topicName):
     consumer = KafkaConsumer(
-        topic_name,
-        bootstrap_servers=[bootstrap_servers],
+        topicName,
+        bootstrap_servers=[bootstrapServers],
         auto_offset_reset="earliest",
         enable_auto_commit=True,)
     try:

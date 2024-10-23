@@ -147,3 +147,4 @@ conn = sqlite3.connect(db_path)
 df.to_sql('vehicle_data', conn, if_exists='replace', index=False)
 conn.close()
 os.environ['DB_PATH'] = db_path
+print("Saved")
