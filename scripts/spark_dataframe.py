@@ -21,10 +21,28 @@ spark = SparkSession.builder \
     .config("spark.mongodb.output.uri", mongo_uri ) \
     .getOrCreate()
 #.config("spark.driver.host", spark_driver) \
+
 spark_driver = os.getenv('SPARK_DRIVER')
 if spark_driver is None:
     spark_driver = spark.conf.get("spark.driver.host")
 print("Loading spark session...")
+
+df = spark.read.csv("vehicle_data.csv")
+df.printSchema()
+
+schema = StructType([
+    StructField("name", StringType(), True),
+    StructField("origin", StringType(), True),
+    StructField("destination", StringType(), True),
+    StructField("time", StringType(), True),
+    StructField("link", StringType(), True),
+    StructField("position", StringType(), True),
+    StructField("spacing", FloatType(), True),
+    StructField("speed", FloatType(), True),
+    StructField("vcount", FloatType(), True),
+    StructField("vspeed", FloatType(), True)
+])
+
 
 lines = spark \
     .readStream \
@@ -34,7 +52,17 @@ lines = spark \
     .load()
 
 lines = lines \
-    .selectExpr("CAST(value AS STRING) as json")
+    .selectExpr("CAST(value AS STRING)") \
+    .select(from_json(col("CAST(value AS STRING)"), schema).alias("data")) \
+    .select("data")
+
+"""
+lines = lines \
+    .selectExpr("CAST(value AS STRING) as json") \
+    .select(from_json(col("value"), schema).alias("data")) \
+    .select("data.*")
+
+"""
 
 query = lines \
     .writeStream \

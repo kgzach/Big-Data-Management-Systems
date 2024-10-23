@@ -142,9 +142,10 @@ else:
 print("Saving data")
 # added to be seen from other scripts
 #db_path = os.getenv('DB_PATH')
-db_path = "../db.sqlite3"
+db_path = "db.sqlite3"
 conn = sqlite3.connect(db_path)
-df.to_sql('vehicle_data', conn, if_exists='replace', index=False)
+df.to_sql('vehicle_data', conn, if_exists='replace', index=True)
+df.to_csv('vehicle_data.csv', index=True)
 conn.close()
 os.environ['DB_PATH'] = db_path
 print("Saved")
