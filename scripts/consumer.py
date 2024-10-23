@@ -1,4 +1,4 @@
-## 1.5 ##
+#### Ερώτημα 1.5
 import os
 from dotenv import load_dotenv
 from kafka import KafkaConsumer
