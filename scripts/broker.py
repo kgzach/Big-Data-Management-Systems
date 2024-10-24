@@ -147,7 +147,9 @@ db_path = "db.sqlite3"
 #conn = sqlite3.connect(db_path)
 #df.to_sql('vehicle_data', conn, if_exists='replace', index=True)
 # #conn.close()
-df[["name", "orig", "dest", "t", "link", "x", "s", "v"]].to_csv('vehicle_data.csv', index=True)
+
+#df = df.reset_index().rename(columns={'index': 'index'})
+df[["index", "name", "orig", "dest", "t", "link", "x", "s", "v"]].to_csv('vehicle_data.csv', index=False)
 
 os.environ['DB_PATH'] = db_path
 print("Saved")
