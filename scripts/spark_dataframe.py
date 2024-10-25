@@ -10,15 +10,18 @@ from pyspark.sql.types import StructType, StructField, StringType, FloatType, Do
 
 load_dotenv()
 kafka_broker = os.getenv('OFFLINE_BROKER')
-db_path = os.getenv('DB_PATH')
+db_uri = os.getenv('MONGO_URI')
 mongo_uri = os.getenv('MONGO_URI')
 topic_name=os.getenv('TOPIC_NAME')
 db_name = os.getenv('MONGO_DB_NAME')
-collection_name = os.getenv('MONGO_DB_COLLECTION')
+raw_data_collection_name = os.getenv('MONGO_RAW_DATA_COLLECTION')
+processed_data_collection_name = os.getenv('MONGO_PROC_DATA_COLLECTION')
 
 client = MongoClient(mongo_uri)
 db = client[db_name]
-collection = db[collection_name]
+raw_collection = db[raw_data_collection_name]
+processed_data_collection = db[processed_data_collection_name]
+
     #### Ερώτημα 2.2
 spark = SparkSession.builder \
     .appName(topic_name) \
@@ -66,11 +69,12 @@ kafka_dataframe = spark \
     .load()
 
 
+
 query = kafka_dataframe.selectExpr("CAST(id AS STRING) AS key", "to_json(struct(*)) AS value") \
     .writeStream \
     .outputMode("append") \
-    .foreachBatch(lambda df, epoch_id: processDataframe(df, processed_schema)) \
-    .foreachBatch(lambda df, epoch_id: saveToMongo(df, db_path, db_name, collection_name)) \
+    .foreachBatch(lambda df, epoch_id: saveToMongo(df, db_uri, db_name, raw_collection)) \
+    .foreachBatch(lambda df, epoch_id: saveToMongo(processDataframe(df, schema), db_uri, db_name, processed_data_collection)) \
     .format("console") \
     .start()
 # Terminates the stream on abort
