@@ -1,11 +1,9 @@
 ### Ερωτήματα 2.2 & 3.1
-
-#### Ερώτημα 2.2
 import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pyspark.sql import SparkSession
-from spark_to_mongo import saveToMongo
+from spark_to_mongo import saveToMongo, processDataframe
 from pyspark.sql.functions import col, avg, count, from_json, to_timestamp, window
 from pyspark.sql.types import StructType, StructField, StringType, FloatType, DoubleType, TimestampType
 
@@ -21,7 +19,7 @@ collection_name = os.getenv('MONGO_DB_COLLECTION')
 client = MongoClient(mongo_uri)
 db = client[db_name]
 collection = db[collection_name]
-
+    #### Ερώτημα 2.2
 spark = SparkSession.builder \
     .appName(topic_name) \
     .master("local[*]") \
@@ -37,16 +35,10 @@ spark_driver = os.getenv('SPARK_DRIVER')
 if spark_driver is None:
     spark_driver = spark.conf.get("spark.driver.host")
 print("Loading spark session...")
-"""
-df_spark = spark.createDataFrame(df) # χρονοβορο
-df_spark.show()
-df.printSchema()
-"""
 
-#### Ερώτημα 3.1
+    #### Ερώτημα 3.1
 
 schema = StructType([
-    #StructField("_c0", StringType(), True),
     StructField("index", StringType(), True),
     StructField("name", StringType(), True),
     StructField("orig", StringType(), True),
@@ -58,21 +50,15 @@ schema = StructType([
     StructField("v", DoubleType(), True)
 ])
 
-df = spark.read.option("header", "true").schema(schema).csv("vehicle_data.csv")
-#df = df.toDF("name", "origin", "destination", "time", "link", "position", "spacing", "speed", "index")
-df.printSchema()
-df.show()
+processed_schema = StructType([
+    StructField("time", TimestampType(), True),
+    StructField("link", StringType(), True),
+    StructField("vcount", DoubleType(), True),
+    StructField("vspeed", DoubleType(), True)
+])
 
-df = df.groupBy("link").agg(
-    count("name").alias("vcount"),
-    avg("v").alias("vspeed")
-)
-"""df = df.groupBy("link").agg( # "time",
-    count("name").alias("vcount"),
-    avg("v").alias("vspeed")
-)"""
 
-lines = spark \
+kafka_dataframe = spark \
     .readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", kafka_broker) \
@@ -80,25 +66,10 @@ lines = spark \
     .load()
 
 
-
-parsed_df = lines.select(from_json(col("value").cast("string"), schema).alias("parsed_value")).select("parsed_value.*")
-
-"""
-lines = lines \
-    .selectExpr("CAST(value AS STRING)") \
-    .select(from_json(col("CAST(value AS STRING)"), schema).alias("data")) \
-    .select("data")
-
-lines = lines \
-    .selectExpr("CAST(value AS STRING) as json") \
-    .select(from_json(col("value"), schema).alias("data")) \
-    .select("data.*")
-
-"""
-
-query = lines \
+query = kafka_dataframe.selectExpr("CAST(id AS STRING) AS key", "to_json(struct(*)) AS value") \
     .writeStream \
     .outputMode("append") \
+    .foreachBatch(lambda df, epoch_id: processDataframe(df, processed_schema)) \
     .foreachBatch(lambda df, epoch_id: saveToMongo(df, db_path, db_name, collection_name)) \
     .format("console") \
     .start()
