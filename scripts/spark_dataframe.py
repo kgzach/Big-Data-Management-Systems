@@ -41,19 +41,18 @@ print("Loading spark session...")
     #### Ερώτημα 3.1
 
 schema = StructType([
-    StructField("index", StringType(), True),
     StructField("name", StringType(), True),
-    StructField("orig", StringType(), True),
-    StructField("dest", StringType(), True),
-    StructField("t", TimestampType(), True),
+    StructField("origin", StringType(), True),
+    StructField("destination", StringType(), True),
+    StructField("time", StringType(), True),
     StructField("link", StringType(), True),
-    StructField("x", DoubleType(), True),
-    StructField("s", DoubleType(), True),
-    StructField("v", DoubleType(), True)
+    StructField("position", DoubleType(), True),
+    StructField("spacing", DoubleType(), True),
+    StructField("speed", DoubleType(), True)
 ])
 
 processed_schema = StructType([
-    StructField("time", TimestampType(), True),
+    StructField("time", StringType(), True),
     StructField("link", StringType(), True),
     StructField("vcount", DoubleType(), True),
     StructField("vspeed", DoubleType(), True)
