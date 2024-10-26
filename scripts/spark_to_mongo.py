@@ -18,8 +18,9 @@ def saveToMongo(df, db_uri, db_name, collection_name):
     try:
         print(f"Saving batch to MongoDB: {db_uri}/{db_name}.{collection_name}")
         df.write \
-            .format("mongodb") \
+            .format("mongo") \
             .mode("append") \
+            .option("checkpointLocation", "out") \
             .option("uri", db_uri) \
             .option("database", db_name) \
             .option("collection", collection_name) \

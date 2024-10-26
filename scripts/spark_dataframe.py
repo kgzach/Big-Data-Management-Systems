@@ -16,6 +16,11 @@ db_name = os.getenv('MONGO_DB_NAME')
 raw_data_collection_name = os.getenv('MONGO_RAW_DATA_COLLECTION')
 processed_data_collection_name = os.getenv('MONGO_PROC_DATA_COLLECTION')
 
+print(f"Kafka Broker: {kafka_broker}")
+print(f"Mongo URI: {mongo_uri}")
+print(f"Topic Name: {topic_name}")
+print(f"Mongo DB Name: {db_name}")
+
 client = MongoClient(mongo_uri)
 db = client[db_name]
 raw_collection = db[raw_data_collection_name]
@@ -27,11 +32,12 @@ spark = SparkSession.builder \
     .master("local[*]") \
     .config("spark.driver.host", "localhost") \
     .config("spark.ui.port", "4050") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.mongodb.spark:mongo-spark-connector_2.12:10.2.1") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.mongodb.spark:mongo-spark-connector_2.12:10.4.0") \
     .config("spark.mongodb.output.uri", mongo_uri ) \
+    .config("spark.mongodb.output.uri", mongo_uri) \
     .getOrCreate()
 #.config("spark.driver.host", spark_driver) \
-#.config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13:3.3.0") \
+#.config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1,org.mongodb:mongo-java-driver:3.12.10")
 
 spark_driver = os.getenv('SPARK_DRIVER')
 if spark_driver is None:
@@ -65,13 +71,13 @@ kafka_dataframe = spark \
     .option("subscribe", topic_name) \
     .load()
 
-query = kafka_dataframe.selectExpr("CAST(key AS STRING) AS key", "CAST(value AS STRING) AS value") \
+query = kafka_dataframe \
+    .selectExpr("CAST(key AS STRING) AS key", "CAST(value AS STRING) AS value") \
     .writeStream \
     .outputMode("append") \
     .foreachBatch(lambda df, epoch_id:processAndSaveBatch(
         df, epoch_id, db_uri, db_name, schema, raw_data_collection_name, processed_data_collection_name
     )) \
-    .format("console") \
     .start()
 # Terminates the stream on abort
 query.awaitTermination()
