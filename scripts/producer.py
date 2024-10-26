@@ -14,8 +14,11 @@ load_dotenv()
 kafka_broker = os.getenv('OFFLINE_BROKER')
 db_path = os.getenv('DB_PATH')
 topic_name=os.getenv('TOPIC_NAME')
-#df = loadDataFromDb(db_path)
-df = pd.read_csv("vehicle_data.csv")
+try:
+    df = pd.read_csv("vehicle_data.csv")
+except FileNotFoundError:
+    df = pd.read_csv("../vehicle_data.csv")
+
 
 last_indices = {}
 
