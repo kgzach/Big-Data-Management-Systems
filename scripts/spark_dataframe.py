@@ -32,7 +32,7 @@ spark = SparkSession.builder \
     .master("local[*]") \
     .config("spark.driver.host", "localhost") \
     .config("spark.ui.port", "4050") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.mongodb.spark:mongo-spark-connector_2.12:10.4.0") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.mongodb.spark:mongo-spark-connector_2.12:3.0.1") \
     .config("spark.mongodb.output.uri", mongo_uri ) \
     .config("spark.mongodb.output.uri", mongo_uri) \
     .getOrCreate()

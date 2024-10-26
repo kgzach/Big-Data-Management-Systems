@@ -20,9 +20,8 @@ def saveToMongo(df, db_uri, db_name, collection_name):
         df.write \
             .format("mongo") \
             .mode("append") \
-            .option("checkpointLocation", "out") \
             .option("uri", db_uri) \
-            .option("database", db_name) \
+            .option("database", "BigData") \
             .option("collection", collection_name) \
             .save()
     except Exception as e:
