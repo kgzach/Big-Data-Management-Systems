@@ -23,7 +23,7 @@ except Exception as e:
     print('No Brokers Available')
     exit(1)
 
-uri = os.getenv('MONGO_URI')
+"""uri = os.getenv('MONGO_URI')
 clientName = os.getenv('MONGO_DB_NAME')
 collections = os.getenv('MONGO_DB_COLLECTION')
 client = MongoClient(uri, server_api=ServerApi('1'))
@@ -32,7 +32,7 @@ try:
     db.create_collection(collections)
 except Exception as e:
     print(e)
-    print('fail')
+    print('fail')"""
 
 
 #https://toruseo.jp/UXsim/docs/index.html

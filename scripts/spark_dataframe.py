@@ -3,8 +3,7 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pyspark.sql import SparkSession
-from spark_to_mongo import saveToMongo, processDataframe
-from pyspark.sql.functions import col, avg, count, from_json, to_timestamp, window
+from spark_to_mongo import processAndSaveBatch
 from pyspark.sql.types import StructType, StructField, StringType, FloatType, DoubleType, TimestampType
 
 
@@ -46,7 +45,7 @@ schema = StructType([
     StructField("name", StringType(), True),
     StructField("orig", StringType(), True),
     StructField("dest", StringType(), True),
-    StructField("t", StringType(), True),
+    StructField("t", TimestampType(), True),
     StructField("link", StringType(), True),
     StructField("x", DoubleType(), True),
     StructField("s", DoubleType(), True),
@@ -60,7 +59,6 @@ processed_schema = StructType([
     StructField("vspeed", DoubleType(), True)
 ])
 
-
 kafka_dataframe = spark \
     .readStream \
     .format("kafka") \
@@ -68,13 +66,12 @@ kafka_dataframe = spark \
     .option("subscribe", topic_name) \
     .load()
 
-
-
-query = kafka_dataframe.selectExpr("CAST(id AS STRING) AS key", "to_json(struct(*)) AS value") \
+query = kafka_dataframe.selectExpr("CAST(key AS STRING) AS key", "CAST(value AS STRING) AS value") \
     .writeStream \
     .outputMode("append") \
-    .foreachBatch(lambda df, epoch_id: saveToMongo(df, db_uri, db_name, raw_collection)) \
-    .foreachBatch(lambda df, epoch_id: saveToMongo(processDataframe(df, schema), db_uri, db_name, processed_data_collection)) \
+    .foreachBatch(lambda df, epoch_id:processAndSaveBatch(
+        df, epoch_id, db_uri, db_name, schema, raw_data_collection_name, processed_data_collection_name
+    )) \
     .format("console") \
     .start()
 # Terminates the stream on abort

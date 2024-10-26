@@ -2,7 +2,6 @@
 from pyspark.sql.types import TimestampType
 from pyspark.sql.functions import col, from_json, split, avg, count
 
-
 def processDataframe(df, schema):
     parsed_df = df.withColumn("json_data", from_json(col("value").cast("string"), schema)) \
         .select("json_data.*")  # Expand JSON fields into individual columns
@@ -28,15 +27,19 @@ def processDataframe(df, schema):
 """
 
 def saveToMongo(df, db_uri, db_name, collection_name):
-    print("Saving batch to MongoDB")
-    transformed_df = df.withColumn("processed_value", col("json"))
-    transformed_df.writeStream \
-        .format("mongodb") \
-        .option("spark.mongodb.output.uri", f"{db_uri}/{db_name}.{collection_name}") \
-        .mode("append") \
-        .save()
-"""
-.option("database", "") \
-.option("collection", "") 
-.option("checkpointLocation", "/path/to/checkpoint/dir")
-.save()"""
+    try:
+        print(f"Saving batch to MongoDB: {db_uri}/{db_name}.{collection_name}")
+        df.write \
+            .format("mongodb") \
+            .option("uri", f"{db_uri}/{db_name}.{collection_name}") \
+            .mode("append") \
+            .save()
+    except Exception as e:
+        print(f"Error saving to MongoDB: {str(e)}")
+#"spark.mongodb.output.uri"
+def processAndSaveBatch(df, epoch_id, db_uri, db_name, schema, raw_data_collection_name, processed_data_collection_name):
+    print(f"Epoch {epoch_id} processed")
+    saveToMongo(df, db_uri, db_name, raw_data_collection_name)
+    processed_df = processDataframe(df, schema)
+    saveToMongo(processed_df, db_uri, db_name, processed_data_collection_name)
+
