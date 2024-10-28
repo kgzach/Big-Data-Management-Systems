@@ -1,17 +1,17 @@
 #### Ερώτημα 3.3
-from pyspark.sql.types import TimestampType
-from pyspark.sql.functions import col, from_json, split, avg, count, avg, to_timestamp, current_timestamp
+from pyspark.sql.functions import col, from_json, count, avg, lit
+
 
 def processDataframe(df, schema):
-    #parsed_df = df.select(from_json(col("value"), schema).alias("data")).select("data.*")
     parsed_df = df.withColumn("json_data", from_json(col("value").cast("string"), schema)) \
         .select("json_data.*")  # Expand JSON fields into individual columns
 
+    first_time = parsed_df.select("time").first()["time"]
     processed_df = parsed_df.groupBy("link").agg(
         count("name").alias("vcount"),
         avg("speed").alias("vspeed")
     )
-    #processed_df = processed_df.withColumn("time", col("t").cast(TimestampType()))
+    processed_df = processed_df.withColumn("time", lit(first_time).cast("string"))
     return processed_df
 
 def rawDataframe(df, schema):
