@@ -4,10 +4,7 @@ import json
 import pandas as pd
 from dotenv import load_dotenv
 from kafka import KafkaProducer
-from auxilliary import loadDataFromDb
 from datetime import datetime, timedelta
-from kafka.admin import KafkaAdminClient, NewTopic
-
 
 load_dotenv()
 
