@@ -6,7 +6,6 @@ from multiprocessing import Process
 def run_script(script_name):
     script_path = os.path.join('scripts', script_name)
     try:
-        print("-" * 30)
         print("Starting " + script_path)
         with subprocess.Popen(
             ['python3', script_path],
@@ -14,16 +13,17 @@ def run_script(script_name):
             stderr=subprocess.PIPE,
             text=True
         ) as proc:
+            print("-" * 50)
             for line in proc.stdout:
                 print(f"{script_name} output: {line}", end='')
             for line in proc.stderr:
                 print(f"{script_name} error: {line}", end='')
     except subprocess.CalledProcessError as e:
-        print("$" * 30)
+        print("$" * 50)
         print(f"Error running {script_name}: {e.stderr}")
         exit(1)
     except FileNotFoundError:
-        print("$" * 30)
+        print("$" * 50)
         print(f"Script {script_name} not found.")
         exit(1)
 

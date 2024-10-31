@@ -29,23 +29,24 @@ end_time_str = end_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 χρονικής περιόδου;"""
 result = proc_collection.aggregate([
     {"$match": {"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$group": {"_id": "$link", "vehicle_count": {"$sum": "$vcount"}}},
-    {"$sort": {"vehicle_count": 1}},
+    #{"$group": {"_id": "$link", "vehicle_count": {"$sum": "$vcount"}}},
+    #{"$sort": {"vehicle_count": -1}},
+    {"$sort": {"vcount": -1}},
     {"$limit": 1}
 ])
 for doc in result:
-    print(f"4.1) Link with the smallest vehicle count: {doc['_id']}, Vehicle count: {doc['vehicle_count']}")
+    #print(f"4.1) Link with the smallest vehicle count: {doc['link']}, Vehicle count: {doc['vehicle_count']}")
+    print(f"4.1) Link with the smallest vehicle count: {doc['link']}, Vehicle count: {doc['vcount']}")
 
 """ Ερώτημα 4.2) Ποια ακμή είχε τη μεγαλύτερη μέση ταχύτητα μεταξύ μιας προκαθορισμένης
 χρονικής περιόδου;"""
 result = proc_collection.aggregate([
     {"$match": {"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$group": {"_id": "$link", "avg_speed": {"$avg": "$vspeed"}}},  # Calculate average speed for each link
-    {"$sort": {"avg_speed": -1}},
+    {"$sort": {"vspeed": 1}},
     {"$limit": 1}
 ])
 for doc in result:
-    print(f"4.2) Link with the highest average speed: {doc['_id']}, Average speed: {doc['avg_speed']}")
+    print(f"4.2) Link with the highest average speed: {doc['link']}, Average speed: {doc['vspeed']}")
 
 """ Ερώτημα 4.3) Ποια ήταν η μεγαλύτερη διαδρομή σε μια προκαθορισμένη χρονική περίοδο;"""
 result = raw_collection.find(
