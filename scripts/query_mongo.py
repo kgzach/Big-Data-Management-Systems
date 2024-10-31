@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, timedelta
 
 load_dotenv()
 mongo_uri = os.getenv('MONGO_URI')
@@ -15,8 +15,12 @@ db = client[db_name]
 raw_collection = db[raw_collection_name]
 proc_collection = db[proc_collection_name]
 
-start_time = datetime(2024, 10, 27, 1, 0, 0)
-end_time = datetime(2024, 10, 29, 23, 0, 0)
+#start_time = datetime(2024, 10, 27, 1, 0, 0)
+#end_time = datetime(2024, 10, 29, 23, 0, 0)
+end_time = datetime.now()
+#start_time = end_time - timedelta(seconds=59)
+start_time = datetime.combine(end_time.date(), datetime.min.time())
+print(f"End: {end_time}, Start: {start_time}")
 start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 end_time_str = end_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 

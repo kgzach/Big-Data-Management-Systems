@@ -19,7 +19,7 @@ except FileNotFoundError:
 
 last_indices = {}
 
-def send_vehicle_data(bootstrapServers, topicName, interval, data):
+def send_vehicle_data(bootstrapServers, topicName, data):
     producer = KafkaProducer(
         bootstrap_servers=bootstrapServers,
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
@@ -66,6 +66,6 @@ if not df.empty:
     replication_factor = 1
     interval = 5
     print("Start sending data")
-    send_vehicle_data(kafka_broker, topic_name, interval, df)
+    send_vehicle_data(kafka_broker, topic_name, df)
 else:
     print("DataFrame is empty. Exiting...")

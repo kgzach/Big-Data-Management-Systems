@@ -1,14 +1,9 @@
 #### Ερωτήματα 1.2 & 1.3
 import os
 import random
-import sqlite3
-import pyspark
-import itertools
 from uxsim import *
 from dotenv import load_dotenv
 from kafka import KafkaProducer
-from pymongo.server_api import ServerApi
-from pymongo.mongo_client import MongoClient
 from kafka.admin import KafkaAdminClient, NewTopic ## 1.3 ##
 
 
@@ -95,7 +90,7 @@ for n1,n2 in [[N2, I2], [I2, S2], [N4, I4], [I4, S4]]:
 dt = 30
 demand = 2 #average demand for the simulation time
 demands = []
-for t in range(0, 3600, dt):
+for t in range(0, 7200, dt):#TODO
     dem = random.uniform(0, demand)
     for n1, n2 in [[N1, S1], [S2, N2], [N3, S3], [S4, N4]]:
         W.adddemand(n1, n2, t, t+dt, dem*0.25)
@@ -140,16 +135,8 @@ if topic_name in topics:
 else:
     create_kafka_topic(admin_client, topicName=topic_name, num_partitions=3, replication_factor=1)
 
-print("Saving data")
-# added to be seen from other scripts
-#db_path = os.getenv('DB_PATH')
-db_path = "db.sqlite3"
-#conn = sqlite3.connect(db_path)
-#df.to_sql('vehicle_data', conn, if_exists='replace', index=True)
-# #conn.close()
-
+print("Saving data...")
 #df = df.reset_index().rename(columns={'index': 'index'})
 df[["index", "name", "orig", "dest", "t", "link", "x", "s", "v"]].to_csv('vehicle_data.csv', index=False)
 
-os.environ['DB_PATH'] = db_path
 print("Saved")
