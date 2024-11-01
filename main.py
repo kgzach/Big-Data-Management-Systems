@@ -1,7 +1,10 @@
 import os
 import time
 import subprocess
+from datetime import datetime
+from dotenv import load_dotenv
 from multiprocessing import Process
+
 
 def run_script(script_name):
     script_path = os.path.join('scripts', script_name)
@@ -29,13 +32,15 @@ def run_script(script_name):
 
 def run_mongo_query():
     while True:
-        mongo_query_process = Process(target=run_script, args=('query_mongo.py',))
-        mongo_query_process.start()
-        mongo_query_process.join()
+        mongo_query = Process(target=run_script, args=('query_mongo.py',))
+        mongo_query.start()
+        mongo_query.join()
         time.sleep(60)
 
 
 if __name__ == '__main__':
+    load_dotenv()
+    os.environ["DB_START_POINT"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     producer_process = Process(target=run_script, args=('producer.py',))
     consumer_process = Process(target=run_script, args=('consumer.py',))
     spark_process = Process(target=run_script, args=('spark_dataframe.py',))

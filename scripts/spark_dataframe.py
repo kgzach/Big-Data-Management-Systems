@@ -52,7 +52,7 @@ schema = StructType([
     StructField("destination", StringType(), True),
     StructField("time", StringType(), True),
     StructField("link", StringType(), True),
-    StructField("position", IntegerType(), True),
+    StructField("position", DoubleType(), True),
     StructField("spacing", IntegerType(), True),
     StructField("speed", DoubleType(), True)
 ])
