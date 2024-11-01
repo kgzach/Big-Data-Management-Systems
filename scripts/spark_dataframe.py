@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from pyspark.sql import SparkSession
 from spark_to_mongo import processAndSaveBatch
-from pyspark.sql.types import StructType, StructField, StringType, FloatType, DoubleType, TimestampType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, TimestampType
 
 
 load_dotenv()
@@ -52,15 +52,15 @@ schema = StructType([
     StructField("destination", StringType(), True),
     StructField("time", StringType(), True),
     StructField("link", StringType(), True),
-    StructField("position", DoubleType(), True),
-    StructField("spacing", DoubleType(), True),
+    StructField("position", IntegerType(), True),
+    StructField("spacing", IntegerType(), True),
     StructField("speed", DoubleType(), True)
 ])
 
 processed_schema = StructType([
     StructField("time", StringType(), True),
     StructField("link", StringType(), True),
-    StructField("vcount", DoubleType(), True),
+    StructField("vcount", IntegerType(), True),
     StructField("vspeed", DoubleType(), True)
 ])
 

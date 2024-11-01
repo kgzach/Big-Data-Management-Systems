@@ -1,4 +1,5 @@
 #### Ερώτημα 3.3
+from pyspark.sql.types import IntegerType
 from pyspark.sql.functions import col, from_json, count, avg, lit
 
 
@@ -8,7 +9,7 @@ def processDataframe(df, schema):
 
     first_time = parsed_df.select("time").first()["time"]
     processed_df = parsed_df.groupBy("link").agg(
-        count("name").alias("vcount"),
+        count("name").cast(IntegerType()).alias("vcount"),
         avg("speed").alias("vspeed")
     )
     processed_df = processed_df.withColumn("time", lit(first_time).cast("string"))
