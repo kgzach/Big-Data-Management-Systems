@@ -37,7 +37,7 @@ seed = None
 W = World(
     name="",
     deltan=5,
-    tmax=3600, #1 hour simulation
+    tmax=7200, #1 hour simulation #TODO
     print_mode=1, save_mode=0, show_mode=1,
     random_seed=seed,
     duo_update_time=600

@@ -56,7 +56,7 @@ schema = StructType([
     StructField("spacing", IntegerType(), True),
     StructField("speed", DoubleType(), True)
 ])
-
+# Not used
 processed_schema = StructType([
     StructField("time", StringType(), True),
     StructField("link", StringType(), True),

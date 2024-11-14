@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from datetime import datetime, timedelta
+from datetime import datetime
 
 load_dotenv()
 mongo_uri = os.getenv('MONGO_URI')
@@ -15,16 +15,19 @@ db = client[db_name]
 raw_collection = db[raw_collection_name]
 proc_collection = db[proc_collection_name]
 
-#start_time = datetime.combine(end_time.date(), datetime.min.time())
-#start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%S")#[:-3]
-# #print(f"End: {end_time}, Start: {start_time}")
 end_time = datetime.now()
 end_time_str = end_time.strftime("%Y-%m-%dT%H:%M:%S")#[:-3]
-start_time_str = os.getenv("DB_START_POINT")
+try:
+    start_time_str = os.getenv("DB_START_POINT")
+    if not start_time_str:
+        # The env variable starts from main script, so we may not have it
+        raise ValueError("DB_START_POINT is not defined.")
+except ValueError:
 
-if not start_time_str:
-    start_time = datetime.combine(end_time.date(), datetime.min.time())
+    #start_time = datetime.combine(end_time.date(), datetime.min.time())
+    start_time = datetime(2000, 1, 1, 0, 0, 0)
     start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%S")
+
 
 
 """ Ερώτημα 4.1) Ποια ακμή είχε το μικρότερο πλήθος οχημάτων μεταξύ μιας προκαθορισμένης
@@ -32,7 +35,7 @@ if not start_time_str:
 result = proc_collection.aggregate([
     {"$match": {"time": {"$gte": start_time_str, "$lt": end_time_str}}},
     #{"$group": {"_id": "$link", "vehicle_count": {"$sum": "$vcount"}}},
-    #{"$sort": {"vehicle_count": -1}},
+    #{"$sort": {"vehicle_count": 1}},
     {"$sort": {"vcount": 1}},
     {"$limit": 1}
 ])
