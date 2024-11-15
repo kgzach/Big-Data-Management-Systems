@@ -31,6 +31,7 @@ def run_script(script_name):
         exit(1)
 
 def run_mongo_query():
+    # Individual function, query process needs to sleep for some time in order to get some new data
     while True:
         mongo_query = Process(target=run_script, args=('query_mongo.py',))
         mongo_query.start()
@@ -43,7 +44,6 @@ if __name__ == '__main__':
     producer_process = Process(target=run_script, args=('producer.py',))
     consumer_process = Process(target=run_script, args=('consumer.py',))
     spark_process = Process(target=run_script, args=('spark_dataframe.py',))
-    #mongo_query_process = Process(target=run_script, args=('query_mongo.py',))
 
     run_script('broker.py')
     producer_process.start()

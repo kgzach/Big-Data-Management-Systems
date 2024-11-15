@@ -23,31 +23,49 @@ start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%S")
 
 """ Ερώτημα 4.1) Ποια ακμή είχε το μικρότερο πλήθος οχημάτων μεταξύ μιας προκαθορισμένης
 χρονικής περιόδου;"""
-result = proc_collection.aggregate([
-    {"$match": {"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$sort": {"vcount": 1}},
-    {"$limit": 1}
-])
-for doc in result:
+min_result = proc_collection.find(
+    {"time": {"$gte": start_time_str, "$lt": end_time_str}}
+).sort("vcount", 1).limit(1)
+for doc in min_result:
     print(f"4.1) Link with the smallest vehicle count: {doc['link']}, Vehicle count: {doc['vcount']}")
+
+max_result = proc_collection.find(
+    {"time": {"$gte": start_time_str, "$lt": end_time_str}}
+).sort("vcount", -1).limit(1)
+for doc in max_result:
+    print(f"\tFor reference link with biggest count: {doc['link']}, Vehicle count: {doc['vcount']}")
 
 
 """ Ερώτημα 4.2) Ποια ακμή είχε τη μεγαλύτερη μέση ταχύτητα μεταξύ μιας προκαθορισμένης
 χρονικής περιόδου;"""
-result = proc_collection.aggregate([
-    {"$match": {"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$sort": {"vspeed": -1}},
-    {"$limit": 1}
-])
+result = proc_collection.find(
+    {"time": {"$gte": start_time_str, "$lt": end_time_str}}
+).sort("vspeed", -1).limit(1)
 for doc in result:
     print(f"4.2) Link with the highest average speed: {doc['link']}, Average speed: {doc['vspeed']}")
+
+min_result = proc_collection.find(
+    {"time": {"$gte": start_time_str, "$lt": end_time_str}}
+).sort("vspeed", 1).limit(1)
+for doc in min_result:
+    print(f"\tFor reference link with the lowest average speed: {doc['link']}, Average speed: {doc['vspeed']}")
 
 
 """ Ερώτημα 4.3) Ποια ήταν η μεγαλύτερη διαδρομή σε μια προκαθορισμένη χρονική περίοδο;"""
 result = raw_collection.aggregate([
     {"$match":{"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$sort":{"position": -1}},
+    {"$group":{"_id":"$name","distance":{"$sum":"$position"}}},
+    {"$sort":{"distance": -1}},
     {"$limit": 1}
 ])
 for doc in result:
-    print(f"4.3) Link with the longest distance: {doc['link']}, Distance: {doc['position']} km")
+    print(f"4.3) Vehicle with the longest distance: {doc['_id']}, Distance: {doc['distance']} km")
+
+min_result = raw_collection.aggregate([
+    {"$match":{"time": {"$gte": start_time_str, "$lt": end_time_str}}},
+    {"$group":{"_id":"$name","distance":{"$sum":"$position"}}},
+    {"$sort":{"distance": 1}},
+    {"$limit": 1}
+])
+for doc in min_result:
+    print(f"\tFor reference link with the shortest distance: {doc['_id']}, Distance: {doc['distance']} km")

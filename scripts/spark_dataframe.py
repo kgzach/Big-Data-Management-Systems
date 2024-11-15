@@ -33,7 +33,6 @@ spark = SparkSession.builder \
     .config("spark.driver.host", "localhost") \
     .config("spark.ui.port", "4050") \
     .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.mongodb.spark:mongo-spark-connector_2.12:3.0.1") \
-    .config("spark.mongodb.output.uri", mongo_uri ) \
     .config("spark.mongodb.output.uri", mongo_uri) \
     .getOrCreate()
 #.config("spark.driver.host", spark_driver) \
