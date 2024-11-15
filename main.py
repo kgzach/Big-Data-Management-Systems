@@ -40,7 +40,6 @@ def run_mongo_query():
 
 if __name__ == '__main__':
     load_dotenv()
-    os.environ["DB_START_POINT"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     producer_process = Process(target=run_script, args=('producer.py',))
     consumer_process = Process(target=run_script, args=('consumer.py',))
     spark_process = Process(target=run_script, args=('spark_dataframe.py',))
