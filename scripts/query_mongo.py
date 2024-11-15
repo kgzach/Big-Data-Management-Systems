@@ -46,7 +46,7 @@ for doc in result:
 """ Ερώτημα 4.3) Ποια ήταν η μεγαλύτερη διαδρομή σε μια προκαθορισμένη χρονική περίοδο;"""
 result = raw_collection.aggregate([
     {"$match":{"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$sort":{"vspeed": -1}},
+    {"$sort":{"position": -1}},
     {"$limit": 1}
 ])
 for doc in result:
