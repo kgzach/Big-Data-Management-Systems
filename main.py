@@ -1,9 +1,8 @@
 import os
 import time
 import subprocess
-from datetime import datetime
 from dotenv import load_dotenv
-from multiprocessing import Process
+from multiprocessing import Process, Event
 
 
 def run_script(script_name):
@@ -30,13 +29,13 @@ def run_script(script_name):
         print(f"Script {script_name} not found.")
         exit(1)
 
-def run_mongo_query():
+def run_mongo_query(stopEvent):
     # Individual function, query process needs to sleep for some time in order to get some new data
-    while True:
+    while not stopEvent.is_set():
         mongo_query = Process(target=run_script, args=('query_mongo.py',))
         mongo_query.start()
         mongo_query.join()
-        time.sleep(60)
+        time.sleep(120)
 
 
 if __name__ == '__main__':
@@ -44,13 +43,14 @@ if __name__ == '__main__':
     producer_process = Process(target=run_script, args=('producer.py',))
     consumer_process = Process(target=run_script, args=('consumer.py',))
     spark_process = Process(target=run_script, args=('spark_dataframe.py',))
+    stop_event = Event()
 
     run_script('broker.py')
     producer_process.start()
     consumer_process.start()
     spark_process.start()
 
-    mongo_query_process = Process(target=run_mongo_query)
+    mongo_query_process = Process(target=run_mongo_query, args=(stop_event,))
     mongo_query_process.start()
     try:
         while True:
@@ -59,6 +59,7 @@ if __name__ == '__main__':
             spark_process.join(timeout=1)
     except KeyboardInterrupt:
         print("\nShutting down processes...")
+        stop_event.set()
         producer_process.terminate()
         consumer_process.terminate()
         spark_process.terminate()
