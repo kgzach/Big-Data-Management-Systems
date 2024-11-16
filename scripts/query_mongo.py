@@ -53,8 +53,29 @@ for doc in min_result:
 
 """ Ερώτημα 4.3) Ποια ήταν η μεγαλύτερη διαδρομή σε μια προκαθορισμένη χρονική περίοδο;"""
 result = raw_collection.aggregate([
-    {"$match":{"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$group":{"_id":"$name","distance":{"$sum":"$position"}}},
+    {
+        "$group": {
+            "_id": "$name",
+            "maxPosition": { "$max": "$position" },
+            "minNonZeroPosition": {
+                "$min": {
+                    "$cond": [
+                        { "$gt": ["$position", 0] },
+                        "$position",
+                        0
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 1,
+            "distance": {
+                "$subtract": ["$maxPosition", "$minNonZeroPosition"]
+            }
+        }
+    },
     {"$sort":{"distance": -1}},
     {"$limit": 1}
 ])
@@ -62,8 +83,29 @@ for doc in result:
     print(f"4.3) Vehicle with the longest distance: {doc['_id']}, Distance: {doc['distance']} km")
 
 min_result = raw_collection.aggregate([
-    {"$match":{"time": {"$gte": start_time_str, "$lt": end_time_str}}},
-    {"$group":{"_id":"$name","distance":{"$sum":"$position"}}},
+    {
+        "$group": {
+            "_id": "$name",
+            "maxPosition": { "$max": "$position" },
+            "minNonZeroPosition": {
+                "$min": {
+                    "$cond": [
+                        { "$gt": ["$position", 0] },
+                        "$position",
+                        0
+                    ]
+                }
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 1,
+            "distance": {
+                "$subtract": ["$maxPosition", "$minNonZeroPosition"]
+            }
+        }
+    },
     {"$sort":{"distance": 1}},
     {"$limit": 1}
 ])

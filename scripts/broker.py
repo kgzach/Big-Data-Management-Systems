@@ -137,6 +137,7 @@ else:
 
 print("Saving data...")
 #df = df.reset_index().rename(columns={'index': 'index'})
+
 df[["index", "name", "orig", "dest", "t", "link", "x", "s", "v"]].to_csv('vehicle_data.csv', index=False)
 
 print("Saved")
