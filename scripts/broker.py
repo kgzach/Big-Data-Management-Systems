@@ -1,5 +1,4 @@
-#### Ερωτήματα 1.2 & 1.3
-import os
+#### Ερωτήματα 1.2 & 1.3 Broker, Topic Initialization and UX Simulation
 import random
 from uxsim import *
 from dotenv import load_dotenv
@@ -18,16 +17,28 @@ except Exception as e:
     print('No Brokers Available')
     exit(1)
 
-"""uri = os.getenv('MONGO_URI')
-clientName = os.getenv('MONGO_DB_NAME')
-collections = os.getenv('MONGO_DB_COLLECTION')
-client = MongoClient(uri, server_api=ServerApi('1'))
-try:
-    db = client[clientName]
-    db.create_collection(collections)
-except Exception as e:
-    print(e)
-    print('fail')"""
+
+def create_kafka_topic(adminClient, topicName, num_partitions, replication_factor):
+    topic_list = [NewTopic(name=topicName, num_partitions=num_partitions, replication_factor=replication_factor)]
+
+    try:
+        adminClient.create_topics(new_topics=topic_list, validate_only=False)
+        print(f"Topic '{topicName}' created successfully")
+    except Exception as e:
+        print(f"Failed to create topic '{topicName}': {e}")
+    finally:
+        adminClient.close()
+
+admin_client = KafkaAdminClient(
+    bootstrap_servers=kafka_broker,
+    client_id=os.getenv('CLIENT_ID')
+)
+topic_name=os.getenv('TOPIC_NAME')
+topics = admin_client.list_topics()
+if topic_name in topics:
+    print(f"Topic '{topic_name}' exists.")
+else:
+    create_kafka_topic(admin_client, topicName=topic_name, num_partitions=1, replication_factor=1)
 
 
 #https://toruseo.jp/UXsim/docs/index.html
@@ -37,7 +48,7 @@ seed = None
 W = World(
     name="",
     deltan=5,
-    tmax=7200, #1 hour simulation #TODO
+    tmax=3600, #1 hour simulation
     print_mode=1, save_mode=0, show_mode=1,
     random_seed=seed,
     duo_update_time=600
@@ -90,7 +101,7 @@ for n1,n2 in [[N2, I2], [I2, S2], [N4, I4], [I4, S4]]:
 dt = 30
 demand = 2 #average demand for the simulation time
 demands = []
-for t in range(0, 7200, dt):#TODO
+for t in range(0, 3600, dt):
     dem = random.uniform(0, demand)
     for n1, n2 in [[N1, S1], [S2, N2], [N3, S3], [S4, N4]]:
         W.adddemand(n1, n2, t, t+dt, dem*0.25)
@@ -101,11 +112,11 @@ for t in range(0, 7200, dt):#TODO
 
 W.exec_simulation()
 W.analyzer.print_simple_stats()
-W.analyzer.basic_to_pandas()
-W.analyzer.link_to_pandas()
-W.analyzer.link_traffic_state_to_pandas()#.head(20)
-W.analyzer.od_to_pandas()
-W.analyzer.vehicles_to_pandas()#.head(20)
+#W.analyzer.basic_to_pandas()
+#W.analyzer.link_to_pandas()
+#W.analyzer.link_traffic_state_to_pandas()#.head(20)
+#W.analyzer.od_to_pandas()
+#W.analyzer.vehicles_to_pandas()#.head(20)
 #W.analyzer.plot_vehicle_log("0")
 #df = W.analyzer.link_to_pandas()
 df = W.analyzer.vehicles_to_pandas()
@@ -113,31 +124,6 @@ df = W.analyzer.vehicles_to_pandas()
 #df['signal_time'] = signal_time
 df['index'] = range(len(df))
 
-def create_kafka_topic(adminClient, topicName, num_partitions, replication_factor):
-    topic_list = [NewTopic(name=topicName, num_partitions=num_partitions, replication_factor=replication_factor)]
-
-    try:
-        adminClient.create_topics(new_topics=topic_list, validate_only=False)
-        print(f"Topic '{topicName}' created successfully")
-    except Exception as e:
-        print(f"Failed to create topic '{topicName}': {e}")
-    finally:
-        adminClient.close()
-
-admin_client = KafkaAdminClient(
-    bootstrap_servers=kafka_broker,
-    client_id=os.getenv('CLIENT_ID')
-)
-topic_name=os.getenv('TOPIC_NAME')
-topics = admin_client.list_topics()
-if topic_name in topics:
-    print(f"Topic '{topic_name}' exists.")
-else:
-    create_kafka_topic(admin_client, topicName=topic_name, num_partitions=3, replication_factor=1)
-
 print("Saving data...")
-#df = df.reset_index().rename(columns={'index': 'index'})
-
 df[["index", "name", "orig", "dest", "t", "link", "x", "s", "v"]].to_csv('vehicle_data.csv', index=False)
-
-print("Saved")
+print("Saved!")

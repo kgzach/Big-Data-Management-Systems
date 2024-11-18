@@ -9,6 +9,7 @@ def run_script(script_name):
     script_path = os.path.join('scripts', script_name)
     try:
         print("Starting " + script_path)
+        # Using pipe in order to print the subprocesses output in terminal
         with subprocess.Popen(
             ['python3', script_path],
             stdout=subprocess.PIPE,
@@ -30,8 +31,9 @@ def run_script(script_name):
         exit(1)
 
 def run_mongo_query(stopEvent):
-    # Individual function, query process needs to sleep for some time in order to get some new data
-    while not stopEvent.is_set():
+    """Individual function, query process needs to sleep for 2 minutes
+    in order to get some new data in database"""
+    while not stopEvent.is_set(): # in order to stop the new mongo_query process from terminal
         mongo_query = Process(target=run_script, args=('query_mongo.py',))
         mongo_query.start()
         mongo_query.join()
