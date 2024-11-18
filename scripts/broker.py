@@ -20,7 +20,6 @@ except Exception as e:
 
 def create_kafka_topic(adminClient, topicName, num_partitions, replication_factor):
     topic_list = [NewTopic(name=topicName, num_partitions=num_partitions, replication_factor=replication_factor)]
-
     try:
         adminClient.create_topics(new_topics=topic_list, validate_only=False)
         print(f"Topic '{topicName}' created successfully")
@@ -112,16 +111,7 @@ for t in range(0, 3600, dt):
 
 W.exec_simulation()
 W.analyzer.print_simple_stats()
-#W.analyzer.basic_to_pandas()
-#W.analyzer.link_to_pandas()
-#W.analyzer.link_traffic_state_to_pandas()#.head(20)
-#W.analyzer.od_to_pandas()
-#W.analyzer.vehicles_to_pandas()#.head(20)
-#W.analyzer.plot_vehicle_log("0")
-#df = W.analyzer.link_to_pandas()
 df = W.analyzer.vehicles_to_pandas()
-#df['av_demand'] = (df['traffic_volume']+df['vehicles_remain'])/3600
-#df['signal_time'] = signal_time
 df['index'] = range(len(df))
 
 print("Saving data...")

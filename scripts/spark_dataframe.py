@@ -35,8 +35,6 @@ spark = SparkSession.builder \
     .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3,org.mongodb.spark:mongo-spark-connector_2.12:3.0.1") \
     .config("spark.mongodb.output.uri", mongo_uri) \
     .getOrCreate()
-#.config("spark.driver.host", spark_driver) \
-#.config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1,org.mongodb:mongo-java-driver:3.12.10")
 
 spark_driver = os.getenv('SPARK_DRIVER')
 if spark_driver is None:
@@ -44,7 +42,7 @@ if spark_driver is None:
 print("Loading spark session...")
 
     #### Ερώτημα 3.1
-
+# Raw collection schema used in spark_to_mongo_script
 schema = StructType([
     StructField("name", StringType(), True),
     StructField("origin", StringType(), True),
@@ -55,14 +53,15 @@ schema = StructType([
     StructField("spacing", IntegerType(), True),
     StructField("speed", DoubleType(), True)
 ])
-# Not used
+# Not used, shows Processed collection schema
 processed_schema = StructType([
-    StructField("time", StringType(), True),
+    StructField("time", TimestampType(), True),
     StructField("link", StringType(), True),
     StructField("vcount", IntegerType(), True),
     StructField("vspeed", DoubleType(), True)
 ])
 
+# Read from kafka
 kafka_dataframe = spark \
     .readStream \
     .format("kafka") \
@@ -70,6 +69,7 @@ kafka_dataframe = spark \
     .option("subscribe", topic_name) \
     .load()
 
+# Write to mongo
 query = kafka_dataframe \
     .selectExpr("CAST(key AS STRING) AS key", "CAST(value AS STRING) AS value") \
     .writeStream \

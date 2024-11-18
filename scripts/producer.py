@@ -28,7 +28,7 @@ def send_vehicle_data(bootstrapServers, topicName, data):
     count = 3600 # needed in order to stop the producer
     cnt = 0
     try:
-        while cnt < count:#while True:
+        while cnt < count:
             cnt+=1
             current_time = datetime.now()
             elapsed_time = (current_time - start_time).total_seconds()
