@@ -1,11 +1,13 @@
 #### Ερώτημα 3.3
 from pyspark.sql.types import IntegerType
-from pyspark.sql.functions import col, from_json, count, avg, lit, when
+from pyspark.sql.functions import col, from_json, count, avg, lit, when, to_timestamp
 
 
 def processDataframe(df, schema):
+    # Expand JSON fields into individual columns
     parsed_df = df.withColumn("json_data", from_json(col("value").cast("string"), schema)) \
-        .select("json_data.*")  # Expand JSON fields into individual columns
+        .select("json_data.*") \
+        .withColumn("time", to_timestamp(col("time"), "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))
     # helps with average, counts 0 instead of -1
     filtered_df = parsed_df.withColumn("speed", when(col("speed") < 0, 0).otherwise(col("speed")))
     first_time = filtered_df.select("time").first()["time"] #selecting the time of the first for the db entry
@@ -13,7 +15,7 @@ def processDataframe(df, schema):
         count("name").cast(IntegerType()).alias("vcount"),
         avg("speed").alias("vspeed")
     )
-    processed_df = processed_df.withColumn("time", lit(first_time).cast("string"))
+    processed_df = processed_df.withColumn("time", lit(first_time)) #.cast("string"))
     return processed_df
 
 def rawDataframe(df, schema):

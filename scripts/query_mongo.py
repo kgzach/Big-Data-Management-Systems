@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 def query(start_time_str, end_time_str) -> None:
     load_dotenv()
@@ -114,10 +114,10 @@ def query(start_time_str, end_time_str) -> None:
         print(f"\tFor reference link with the shortest route: {doc['_id']}, Distance: {doc['distance']} km")
 
 if __name__ == "__main__":
-    end_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
-    start_time = datetime(2000, 1, 1, 0, 0).strftime("%Y-%m-%dT%H:%M")
-    start_2_minutes=(datetime.now() - timedelta(minutes=2)).strftime("%Y-%m-%d %H:%M")
-
+    TIMEZONE = timezone.utc
+    end_time = datetime.now(TIMEZONE)
+    start_time = datetime(2000, 1, 1, 0, 0,  tzinfo=TIMEZONE)
+    start_2_minutes= end_time - timedelta(minutes=2)
     print("#" * 5 + f" Last minute results at {end_time} " + "#" * 5)
     query(start_2_minutes, end_time)
     print("#" * 10 + f" Overall results at {end_time} " + "#" * 10)
