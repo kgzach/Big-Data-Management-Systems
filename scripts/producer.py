@@ -38,7 +38,7 @@ def send_vehicle_data(bootstrapServers, topicName, data):
                 cur_index = row['index']
                 # Index will help t
                 #if row['t'] <= elapsed_time:
-                if row['t'] <= elapsed_time and int(vehicle_id) < 10: # DEBUG ONLY
+                if row['t'] <= elapsed_time:# and int(vehicle_id) < 10: # DEBUG ONLY
                     if row['link'] not in ["waiting_at_origin_node", "trip_end"]:
                         #cur_index doesn't allow for the same message to be sent once and not every time.
                         if vehicle_id not in last_indices or last_indices[vehicle_id] < cur_index:
